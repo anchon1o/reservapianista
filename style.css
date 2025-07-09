@@ -68,3 +68,16 @@ input#userId {
   background-color: #ffe0e0;
   cursor: pointer;
 }
+
+.resumen-reserva {
+  background-color: #f4f8ff;
+  border-left: 4px solid #3a78d6;
+  padding: 10px 12px;
+  margin-bottom: 15px;
+  font-size: 15px;
+  border-radius: 6px;
+}
+.resumen-reserva strong {
+  color: #003366;
+}
+
