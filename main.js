@@ -1,4 +1,4 @@
-// main.js con alternancia de vista mensual/semanal y selección de día
+// main.js con verificación de reservas pendientes antes de permitir una nueva
 
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
@@ -128,6 +128,35 @@ function showDayDetail(date) {
       div.textContent = hourStr;
       if (currentUser.rol === "alumno") {
         div.onclick = () => {
+          const now = new Date();
+          const resDate = new Date(date);
+          resDate.setHours(Math.floor(min / 60), min % 60, 0, 0);
+          const diffHours = (resDate - now) / (1000 * 60 * 60);
+
+          if (diffHours < 96) {
+            alert("La reserva debe hacerse con al menos 96 horas de antelación.");
+            return;
+          }
+          if (diffHours > 240) {
+            alert("La reserva no puede hacerse con más de 10 días de antelación.");
+            return;
+          }
+
+          const reservaPendiente = reservas.some(r => r.alumno === currentUser.id && new Date(r.fecha + ' ' + r.hora) > now);
+          if (reservaPendiente) {
+            alert("Ya tienes una reserva pendiente. No puedes reservar otra hasta realizarla.");
+            return;
+          }
+
+          const haceMenosDe2Semanas = reservas.some(r => {
+            return r.alumno === currentUser.id && r.fecha &&
+              Math.abs(new Date(r.fecha) - now) < 14 * 24 * 60 * 60 * 1000;
+          });
+          if (haceMenosDe2Semanas) {
+            alert("Solo puedes tener una reserva cada dos semanas.");
+            return;
+          }
+
           reservas.push({ alumno: currentUser.id, profesor: "P00", fecha: date.toDateString(), hora: hourStr });
           showDayDetail(date);
         };
