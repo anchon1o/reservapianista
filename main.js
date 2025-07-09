@@ -30,7 +30,7 @@ btnLogin.onclick = () => {
   appDiv.classList.remove("hidden");
   const cursoInfo = currentUser.nivel ? ` - ${currentUser.nivel} ${currentUser.curso}` : "";
   tituloUser.textContent = `Hola ${currentUser.nombre} (${currentUser.rol})${cursoInfo}`;
-  currentView = currentUser.rol === "profesor" ? "semana" : "mes";
+  currentView = ["profesor", "admin"].includes(currentUser.rol) ? "semana" : "mes";
   renderCalendar();
 };
 
@@ -44,14 +44,11 @@ btnLogout.onclick = () => {
 function renderCalendar() {
   calendarDiv.innerHTML = "";
 
-  // Insertar botón de cambiar vista si es profesor
+  // Mostrar siempre el botón de cambiar vista
   const existingToggle = document.getElementById("btnToggleView");
-  if (currentUser.rol === "profesor") {
-    if (!existingToggle) appDiv.insertBefore(btnToggleView, calendarDiv);
-    btnToggleView.style.display = "inline-block";
-  } else {
-    if (existingToggle) existingToggle.style.display = "none";
-  }
+  if (!existingToggle) appDiv.insertBefore(btnToggleView, calendarDiv);
+  btnToggleView.style.display = "inline-block";
+  btnToggleView.textContent = currentView === "mes" ? "🔄 Ver semana" : "🔄 Ver mes";
 
   if (currentUser.rol === "alumno") {
     const hoy = new Date();
