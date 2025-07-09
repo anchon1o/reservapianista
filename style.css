@@ -1,0 +1,7 @@
+
+body { font-family: Arial, sans-serif; margin: 20px; }
+.hidden { display: none; }
+#calendar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.cell { border: 1px solid #ccc; padding: 8px; text-align: center; cursor: pointer; }
+.libre { background-color: #e0ffe0; }
+.reservado { background-color: #ffe0e0; }
