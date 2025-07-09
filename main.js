@@ -9,7 +9,7 @@ const tituloUser = document.getElementById("tituloUser");
 const calendarDiv = document.getElementById("calendar");
 
 let currentUser = null;
-let currentView = "mes";
+let currentView = null;
 let selectedDate = new Date();
 const reservas = [];
 
@@ -39,6 +39,7 @@ btnLogout.onclick = () => {
   reservas.length = 0;
   loginDiv.classList.remove("hidden");
   appDiv.classList.add("hidden");
+  calendarDiv.innerHTML = "";
 };
 
 function renderCalendar() {
@@ -83,7 +84,8 @@ function renderMonthView() {
   grid.appendChild(header);
 
   let fila = document.createElement("tr");
-  for (let i = 1; i < primerDia.getDay(); i++) {
+  const diaSemana = primerDia.getDay() === 0 ? 6 : primerDia.getDay() - 1;
+  for (let i = 0; i < diaSemana; i++) {
     fila.appendChild(document.createElement("td"));
   }
 
@@ -93,6 +95,7 @@ function renderMonthView() {
     celda.textContent = dia;
     celda.onclick = () => {
       selectedDate = fecha;
+      currentView = "semana";
       renderCalendar();
     };
     fila.appendChild(celda);
@@ -133,18 +136,25 @@ function getNombreMes(mes) {
 }
 
 function renderWeekView() {
+  const inicioSemana = new Date(selectedDate);
+  const dia = inicioSemana.getDay();
+  const diferencia = dia === 0 ? -6 : 1 - dia;
+  inicioSemana.setDate(inicioSemana.getDate() + diferencia);
+
   const grid = document.createElement("table");
   const header = document.createElement("tr");
-  ["Lun", "Mar", "Mié", "Jue", "Vie"].forEach(d => {
+  for (let i = 0; i < 5; i++) {
+    const fecha = new Date(inicioSemana);
+    fecha.setDate(fecha.getDate() + i);
     const th = document.createElement("th");
-    th.textContent = d;
+    th.textContent = `${["Lun", "Mar", "Mié", "Jue", "Vie"][i]}\n${fecha.getDate()}`;
     header.appendChild(th);
-  });
+  }
   grid.appendChild(header);
 
   for (let h = 9; h < 22; h++) {
     const fila = document.createElement("tr");
-    for (let d = 1; d <= 5; d++) {
+    for (let d = 0; d < 5; d++) {
       const celda = document.createElement("td");
       celda.textContent = `${h}:00`;
       fila.appendChild(celda);
