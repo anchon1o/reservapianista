@@ -1,83 +1,40 @@
 body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
+  font-family: sans-serif;
+  padding: 1rem;
+  background: #f8f8f8;
 }
 
 .hidden {
   display: none;
 }
 
-button {
-  margin: 8px 4px;
-  padding: 6px 12px;
-  font-size: 14px;
-  cursor: pointer;
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 1rem;
 }
 
-input#userId {
-  padding: 6px;
-  font-size: 16px;
-  width: 200px;
+th, td {
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+th {
+  background: #e0e0e0;
 }
 
 #calendar {
-  margin-top: 20px;
+  margin-top: 1rem;
 }
 
-/* Vista mensual */
-.month-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-top: 12px;
-}
-
-.cell {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: center;
-  min-height: 40px;
-  font-size: 14px;
-}
-
-.header {
-  background-color: #eee;
-  font-weight: bold;
-}
-
-.empty {
-  background-color: #f9f9f9;
-}
-
-.day {
-  background-color: #ffffff;
-  cursor: pointer;
-}
-
-.day:hover {
-  background-color: #dff0ff;
-}
-
-/* Vista de horas del día */
-.libre {
-  background-color: #e0ffe0;
-  cursor: pointer;
-}
-
-.reservado {
-  background-color: #ffe0e0;
-  cursor: pointer;
+button {
+  margin: 0.5rem;
 }
 
 .resumen-reserva {
-  background-color: #f4f8ff;
-  border-left: 4px solid #3a78d6;
-  padding: 10px 12px;
-  margin-bottom: 15px;
-  font-size: 15px;
-  border-radius: 6px;
+  background: #fff9c4;
+  border: 1px solid #fdd835;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
 }
-.resumen-reserva strong {
-  color: #003366;
-}
-
