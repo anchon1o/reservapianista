@@ -1,4 +1,4 @@
-// main.js corregido completamente: el botón 'Cambiar vista' alterna correctamente entre vista mensual y semanal
+// main.js completo actualizado: gestión de reservas y cambio entre vista mensual/semanal
 
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
@@ -44,7 +44,6 @@ btnLogout.onclick = () => {
 function renderCalendar() {
   calendarDiv.innerHTML = "";
 
-  // Mostrar siempre el botón de cambiar vista
   const existingToggle = document.getElementById("btnToggleView");
   if (!existingToggle) appDiv.insertBefore(btnToggleView, calendarDiv);
   btnToggleView.style.display = "inline-block";
@@ -66,4 +65,92 @@ function renderCalendar() {
   } else {
     renderWeekView();
   }
+}
+
+function renderMonthView() {
+  const mes = selectedDate.getMonth();
+  const anio = selectedDate.getFullYear();
+  const primerDia = new Date(anio, mes, 1);
+  const ultimoDia = new Date(anio, mes + 1, 0);
+
+  const grid = document.createElement("table");
+  const header = document.createElement("tr");
+  ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].forEach(d => {
+    const th = document.createElement("th");
+    th.textContent = d;
+    header.appendChild(th);
+  });
+  grid.appendChild(header);
+
+  let fila = document.createElement("tr");
+  for (let i = 1; i < primerDia.getDay(); i++) {
+    fila.appendChild(document.createElement("td"));
+  }
+
+  for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
+    const fecha = new Date(anio, mes, dia);
+    const celda = document.createElement("td");
+    celda.textContent = dia;
+    celda.onclick = () => {
+      selectedDate = fecha;
+      renderCalendar();
+    };
+    fila.appendChild(celda);
+    if (fecha.getDay() === 0) {
+      grid.appendChild(fila);
+      fila = document.createElement("tr");
+    }
+  }
+  if (fila.children.length > 0) grid.appendChild(fila);
+
+  const controles = document.createElement("div");
+  const titulo = document.createElement("h3");
+  titulo.textContent = `${getNombreMes(mes)} ${anio}`;
+  controles.appendChild(titulo);
+
+  const prev = document.createElement("button");
+  prev.textContent = "◀";
+  prev.onclick = () => {
+    selectedDate.setMonth(selectedDate.getMonth() - 1);
+    renderCalendar();
+  };
+
+  const next = document.createElement("button");
+  next.textContent = "▶";
+  next.onclick = () => {
+    selectedDate.setMonth(selectedDate.getMonth() + 1);
+    renderCalendar();
+  };
+
+  controles.appendChild(prev);
+  controles.appendChild(next);
+  calendarDiv.appendChild(controles);
+  calendarDiv.appendChild(grid);
+}
+
+function getNombreMes(mes) {
+  return ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"][mes];
+}
+
+function renderWeekView() {
+  const grid = document.createElement("table");
+  const header = document.createElement("tr");
+  ["Lun", "Mar", "Mié", "Jue", "Vie"].forEach(d => {
+    const th = document.createElement("th");
+    th.textContent = d;
+    header.appendChild(th);
+  });
+  grid.appendChild(header);
+
+  for (let h = 9; h < 22; h++) {
+    const fila = document.createElement("tr");
+    for (let d = 1; d <= 5; d++) {
+      const celda = document.createElement("td");
+      celda.textContent = `${h}:00`;
+      fila.appendChild(celda);
+    }
+    grid.appendChild(fila);
+  }
+
+  calendarDiv.appendChild(grid);
 }
