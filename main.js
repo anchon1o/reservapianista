@@ -48,9 +48,10 @@ function renderCalendar() {
     const proxima = reservas.find(r => r.alumno === currentUser.id && new Date(r.fecha + ' ' + r.hora) > hoy);
     if (proxima) {
       const aviso = document.createElement("div");
-      aviso.innerHTML = `👉 Próxima reserva: <strong>${proxima.fecha}</strong> a las <strong>${proxima.hora}</strong><br>Obra: ${proxima.obra || "(sin especificar)"}`;
-      aviso.style.marginBottom = "15px";
+      aviso.className = "resumen-reserva";
+      aviso.innerHTML = `👉 Próxima reserva: <strong>${proxima.fecha}</strong> a las <strong>${proxima.hora}</strong><br>🎼 Obra: <em>${proxima.obra || "(sin especificar)"}</em>`;
       calendarDiv.appendChild(aviso);
+
     }
   }
 
