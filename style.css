@@ -7,33 +7,11 @@ body {
   display: none;
 }
 
-#calendar {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr); /* 5 días x 2 columnas */
-  gap: 4px;
-  margin-top: 20px;
-}
-
-.cell {
-  border: 1px solid #ccc;
-  padding: 6px;
-  text-align: center;
+button {
+  margin: 8px 4px;
+  padding: 6px 12px;
   font-size: 14px;
-  min-height: 40px;
   cursor: pointer;
-}
-
-.cell strong {
-  font-size: 13px;
-  line-height: 1.2;
-}
-
-.libre {
-  background-color: #e0ffe0;
-}
-
-.reservado {
-  background-color: #ffe0e0;
 }
 
 input#userId {
@@ -42,8 +20,51 @@ input#userId {
   width: 200px;
 }
 
-button {
-  margin-left: 8px;
-  padding: 6px 12px;
+#calendar {
+  margin-top: 20px;
+}
+
+/* Vista mensual */
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.cell {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+  min-height: 40px;
   font-size: 14px;
+}
+
+.header {
+  background-color: #eee;
+  font-weight: bold;
+}
+
+.empty {
+  background-color: #f9f9f9;
+}
+
+.day {
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.day:hover {
+  background-color: #dff0ff;
+}
+
+/* Vista de horas del día */
+.libre {
+  background-color: #e0ffe0;
+  cursor: pointer;
+}
+
+.reservado {
+  background-color: #ffe0e0;
+  cursor: pointer;
 }
