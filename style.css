@@ -1,7 +1,49 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
 
-body { font-family: Arial, sans-serif; margin: 20px; }
-.hidden { display: none; }
-#calendar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
-.cell { border: 1px solid #ccc; padding: 8px; text-align: center; cursor: pointer; }
-.libre { background-color: #e0ffe0; }
-.reservado { background-color: #ffe0e0; }
+.hidden {
+  display: none;
+}
+
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr); /* 5 días x 2 columnas */
+  gap: 4px;
+  margin-top: 20px;
+}
+
+.cell {
+  border: 1px solid #ccc;
+  padding: 6px;
+  text-align: center;
+  font-size: 14px;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.cell strong {
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.libre {
+  background-color: #e0ffe0;
+}
+
+.reservado {
+  background-color: #ffe0e0;
+}
+
+input#userId {
+  padding: 6px;
+  font-size: 16px;
+  width: 200px;
+}
+
+button {
+  margin-left: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
