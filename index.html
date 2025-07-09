@@ -1,23 +1,24 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Reserva Pianista</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div id="login">
-    <h2>Login simulado</h2>
-    <input id="userId" placeholder="ID (A000, P00, admin)">
+    <input id="userId" placeholder="ID de usuario" />
     <button id="btnLogin">Entrar</button>
   </div>
+
   <div id="app" class="hidden">
     <h2 id="tituloUser"></h2>
     <div id="calendar"></div>
     <button id="btnLogout">Cerrar sesión</button>
   </div>
-  <script src="data.js"></script>
+
+  <script src="usuarios.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
