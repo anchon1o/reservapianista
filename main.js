@@ -1,4 +1,4 @@
-// main.js completo actualizado: gestión de reservas y cambio entre vista mensual/semanal
+// main.js completo actualizado y corregido: gestión de reservas y cambio entre vista mensual/semanal
 
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
@@ -15,7 +15,6 @@ const reservas = [];
 
 const btnToggleView = document.createElement("button");
 btnToggleView.id = "btnToggleView";
-btnToggleView.textContent = "🔄 Ver semana";
 btnToggleView.onclick = () => {
   currentView = currentView === "mes" ? "semana" : "mes";
   btnToggleView.textContent = currentView === "mes" ? "🔄 Ver semana" : "🔄 Ver mes";
@@ -45,8 +44,9 @@ btnLogout.onclick = () => {
 function renderCalendar() {
   calendarDiv.innerHTML = "";
 
-  const existingToggle = document.getElementById("btnToggleView");
-  if (!existingToggle) appDiv.insertBefore(btnToggleView, calendarDiv);
+  if (!document.getElementById("btnToggleView")) {
+    appDiv.insertBefore(btnToggleView, calendarDiv);
+  }
   btnToggleView.style.display = "inline-block";
   btnToggleView.textContent = currentView === "mes" ? "🔄 Ver semana" : "🔄 Ver mes";
 
