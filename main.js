@@ -1,4 +1,4 @@
-// main.js corregido: el botón 'Cambiar vista' alterna entre vista mensual y semanal únicamente, y se oculta en vista de día
+// main.js corregido completamente: el botón 'Cambiar vista' alterna correctamente entre vista mensual y semanal
 
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
@@ -8,15 +8,19 @@ const appDiv = document.getElementById("app");
 const tituloUser = document.getElementById("tituloUser");
 const calendarDiv = document.getElementById("calendar");
 
-const btnToggleView = document.createElement("button");
-btnToggleView.textContent = "🔄 Ver semana";
-btnToggleView.id = "btnToggleView";
-appDiv.insertBefore(btnToggleView, calendarDiv);
-
 let currentUser = null;
 let currentView = "mes";
 let selectedDate = new Date();
 const reservas = [];
+
+const btnToggleView = document.createElement("button");
+btnToggleView.id = "btnToggleView";
+btnToggleView.textContent = "🔄 Ver semana";
+btnToggleView.onclick = () => {
+  currentView = currentView === "mes" ? "semana" : "mes";
+  btnToggleView.textContent = currentView === "mes" ? "🔄 Ver semana" : "🔄 Ver mes";
+  renderCalendar();
+};
 
 btnLogin.onclick = () => {
   const id = userIdInput.value.trim();
@@ -26,7 +30,7 @@ btnLogin.onclick = () => {
   appDiv.classList.remove("hidden");
   const cursoInfo = currentUser.nivel ? ` - ${currentUser.nivel} ${currentUser.curso}` : "";
   tituloUser.textContent = `Hola ${currentUser.nombre} (${currentUser.rol})${cursoInfo}`;
-  currentView = "mes"; // Reset a vista mensual al iniciar
+  currentView = currentUser.rol === "profesor" ? "semana" : "mes";
   renderCalendar();
 };
 
@@ -37,15 +41,17 @@ btnLogout.onclick = () => {
   appDiv.classList.add("hidden");
 };
 
-btnToggleView.onclick = () => {
-  currentView = currentView === "mes" ? "semana" : "mes";
-  btnToggleView.textContent = currentView === "mes" ? "🔄 Ver semana" : "🔄 Ver mes";
-  renderCalendar();
-};
-
 function renderCalendar() {
   calendarDiv.innerHTML = "";
-  btnToggleView.style.display = currentUser.rol === "profesor" ? "inline-block" : "none";
+
+  // Insertar botón de cambiar vista si es profesor
+  const existingToggle = document.getElementById("btnToggleView");
+  if (currentUser.rol === "profesor") {
+    if (!existingToggle) appDiv.insertBefore(btnToggleView, calendarDiv);
+    btnToggleView.style.display = "inline-block";
+  } else {
+    if (existingToggle) existingToggle.style.display = "none";
+  }
 
   if (currentUser.rol === "alumno") {
     const hoy = new Date();
