@@ -1,4 +1,4 @@
-// main.js corregido: el botón 'Cambiar vista' alterna entre vista mensual y semanal únicamente
+// main.js corregido: el botón 'Cambiar vista' alterna entre vista mensual y semanal únicamente, y se oculta en vista de día
 
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
@@ -9,7 +9,8 @@ const tituloUser = document.getElementById("tituloUser");
 const calendarDiv = document.getElementById("calendar");
 
 const btnToggleView = document.createElement("button");
-btnToggleView.textContent = "🔄 Cambiar vista";
+btnToggleView.textContent = "🔄 Ver semana";
+btnToggleView.id = "btnToggleView";
 appDiv.insertBefore(btnToggleView, calendarDiv);
 
 let currentUser = null;
@@ -25,6 +26,7 @@ btnLogin.onclick = () => {
   appDiv.classList.remove("hidden");
   const cursoInfo = currentUser.nivel ? ` - ${currentUser.nivel} ${currentUser.curso}` : "";
   tituloUser.textContent = `Hola ${currentUser.nombre} (${currentUser.rol})${cursoInfo}`;
+  currentView = "mes"; // Reset a vista mensual al iniciar
   renderCalendar();
 };
 
@@ -37,11 +39,13 @@ btnLogout.onclick = () => {
 
 btnToggleView.onclick = () => {
   currentView = currentView === "mes" ? "semana" : "mes";
+  btnToggleView.textContent = currentView === "mes" ? "🔄 Ver semana" : "🔄 Ver mes";
   renderCalendar();
 };
 
 function renderCalendar() {
   calendarDiv.innerHTML = "";
+  btnToggleView.style.display = currentUser.rol === "profesor" ? "inline-block" : "none";
 
   if (currentUser.rol === "alumno") {
     const hoy = new Date();
@@ -60,5 +64,3 @@ function renderCalendar() {
     renderWeekView();
   }
 }
-
-// Las funciones showDayDetail, renderMonthView, renderWeekView permanecen igual
