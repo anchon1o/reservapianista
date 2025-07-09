@@ -1,4 +1,4 @@
-// main.js con verificación de reservas pendientes antes de permitir una nueva
+// main.js con resumen, corrección de doble columna, y entrada de obra
 
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
@@ -23,7 +23,8 @@ btnLogin.onclick = () => {
   currentUser = { id, ...usuarios[id] };
   loginDiv.classList.add("hidden");
   appDiv.classList.remove("hidden");
-  tituloUser.textContent = `Hola ${currentUser.nombre} (${currentUser.rol})`;
+  const cursoInfo = currentUser.nivel ? ` - ${currentUser.nivel} ${currentUser.curso}` : "";
+  tituloUser.textContent = `Hola ${currentUser.nombre} (${currentUser.rol})${cursoInfo}`;
   renderCalendar();
 };
 
@@ -41,10 +42,93 @@ btnToggleView.onclick = () => {
 
 function renderCalendar() {
   calendarDiv.innerHTML = "";
+
+  if (currentUser.rol === "alumno") {
+    const hoy = new Date();
+    const proxima = reservas.find(r => r.alumno === currentUser.id && new Date(r.fecha + ' ' + r.hora) > hoy);
+    if (proxima) {
+      const aviso = document.createElement("div");
+      aviso.innerHTML = `👉 Próxima reserva: <strong>${proxima.fecha}</strong> a las <strong>${proxima.hora}</strong><br>Obra: ${proxima.obra || "(sin especificar)"}`;
+      aviso.style.marginBottom = "15px";
+      calendarDiv.appendChild(aviso);
+    }
+  }
+
   if (currentView === "mes" || currentUser.rol === "alumno") {
     renderMonthView();
   } else {
     renderWeekView();
+  }
+}
+
+function showDayDetail(date) {
+  calendarDiv.innerHTML = "";
+  const label = document.createElement("h3");
+  label.textContent = date.toLocaleDateString("es");
+  calendarDiv.appendChild(label);
+
+  const start = 9 * 60;
+  const end = 22 * 60;
+  const interval = (currentUser.rol === "alumno" && currentUser.nivel === "GP" && currentUser.curso >= 5) ? 30 : 15;
+
+  for (let min = start; min < end; min += interval) {
+    const hourStr = `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
+    const reserva = reservas.find(r => r.fecha === date.toDateString() && r.hora === hourStr);
+    const div = document.createElement("div");
+    div.className = "cell";
+
+    if (reserva) {
+      div.classList.add("reservado");
+      div.textContent = `${hourStr}`;
+      if (reserva.obra) div.title = `Obra: ${reserva.obra}`;
+      if (currentUser.rol === "alumno" && reserva.alumno === currentUser.id) {
+        div.onclick = () => {
+          reservas.splice(reservas.indexOf(reserva), 1);
+          showDayDetail(date);
+        };
+      }
+    } else {
+      div.classList.add("libre");
+      div.textContent = hourStr;
+      if (currentUser.rol === "alumno") {
+        div.onclick = () => {
+          const now = new Date();
+          const resDate = new Date(date);
+          resDate.setHours(Math.floor(min / 60), min % 60, 0, 0);
+          const diffHours = (resDate - now) / (1000 * 60 * 60);
+
+          if (diffHours < 96) {
+            alert("La reserva debe hacerse con al menos 96 horas de antelación.");
+            return;
+          }
+          if (diffHours > 240) {
+            alert("La reserva no puede hacerse con más de 10 días de antelación.");
+            return;
+          }
+
+          const reservaPendiente = reservas.some(r => r.alumno === currentUser.id && new Date(r.fecha + ' ' + r.hora) > now);
+          if (reservaPendiente) {
+            alert("Ya tienes una reserva pendiente. No puedes reservar otra hasta realizarla.");
+            return;
+          }
+
+          const haceMenosDe2Semanas = reservas.some(r => {
+            return r.alumno === currentUser.id && r.fecha &&
+              Math.abs(new Date(r.fecha) - now) < 14 * 24 * 60 * 60 * 1000;
+          });
+          if (haceMenosDe2Semanas) {
+            alert("Solo puedes tener una reserva cada dos semanas.");
+            return;
+          }
+
+          const obra = prompt("¿Qué obra u obras vas a ensayar?");
+          reservas.push({ alumno: currentUser.id, profesor: "P00", fecha: date.toDateString(), hora: hourStr, obra });
+          showDayDetail(date);
+        };
+      }
+    }
+
+    calendarDiv.appendChild(div);
   }
 }
 
@@ -96,75 +180,6 @@ function renderMonthView() {
     selectedDate.setMonth(selectedDate.getMonth() + 1);
     renderCalendar();
   };
-}
-
-function showDayDetail(date) {
-  calendarDiv.innerHTML = "";
-  const label = document.createElement("h3");
-  label.textContent = date.toLocaleDateString("es");
-  calendarDiv.appendChild(label);
-
-  const start = 9 * 60;
-  const end = 22 * 60;
-  const interval = (currentUser.rol === "alumno" && currentUser.nivel === "GP" && currentUser.curso >= 5) ? 30 : 15;
-
-  for (let min = start; min < end; min += interval) {
-    const hourStr = `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
-    const reserva = reservas.find(r => r.fecha === date.toDateString() && r.hora === hourStr);
-    const div = document.createElement("div");
-    div.className = "cell";
-
-    if (reserva) {
-      div.classList.add("reservado");
-      div.textContent = `${hourStr}`;
-      if (currentUser.rol === "alumno" && reserva.alumno === currentUser.id) {
-        div.onclick = () => {
-          reservas.splice(reservas.indexOf(reserva), 1);
-          showDayDetail(date);
-        };
-      }
-    } else {
-      div.classList.add("libre");
-      div.textContent = hourStr;
-      if (currentUser.rol === "alumno") {
-        div.onclick = () => {
-          const now = new Date();
-          const resDate = new Date(date);
-          resDate.setHours(Math.floor(min / 60), min % 60, 0, 0);
-          const diffHours = (resDate - now) / (1000 * 60 * 60);
-
-          if (diffHours < 96) {
-            alert("La reserva debe hacerse con al menos 96 horas de antelación.");
-            return;
-          }
-          if (diffHours > 240) {
-            alert("La reserva no puede hacerse con más de 10 días de antelación.");
-            return;
-          }
-
-          const reservaPendiente = reservas.some(r => r.alumno === currentUser.id && new Date(r.fecha + ' ' + r.hora) > now);
-          if (reservaPendiente) {
-            alert("Ya tienes una reserva pendiente. No puedes reservar otra hasta realizarla.");
-            return;
-          }
-
-          const haceMenosDe2Semanas = reservas.some(r => {
-            return r.alumno === currentUser.id && r.fecha &&
-              Math.abs(new Date(r.fecha) - now) < 14 * 24 * 60 * 60 * 1000;
-          });
-          if (haceMenosDe2Semanas) {
-            alert("Solo puedes tener una reserva cada dos semanas.");
-            return;
-          }
-
-          reservas.push({ alumno: currentUser.id, profesor: "P00", fecha: date.toDateString(), hora: hourStr });
-          showDayDetail(date);
-        };
-      }
-    }
-
-    calendarDiv.appendChild(div);
-  }
 }
 
 function renderWeekView() {
