@@ -1,4 +1,4 @@
-// main.js corregido con doble columna por día funcional
+// main.js con alternancia de vista mensual/semanal y selección de día
 
 const btnLogin = document.getElementById("btnLogin");
 const btnLogout = document.getElementById("btnLogout");
@@ -8,7 +8,13 @@ const appDiv = document.getElementById("app");
 const tituloUser = document.getElementById("tituloUser");
 const calendarDiv = document.getElementById("calendar");
 
+const btnToggleView = document.createElement("button");
+btnToggleView.textContent = "🔄 Cambiar vista";
+appDiv.insertBefore(btnToggleView, calendarDiv);
+
 let currentUser = null;
+let currentView = "mes";
+let selectedDate = new Date();
 const reservas = [];
 
 btnLogin.onclick = () => {
@@ -28,70 +34,129 @@ btnLogout.onclick = () => {
   appDiv.classList.add("hidden");
 };
 
+btnToggleView.onclick = () => {
+  currentView = currentView === "mes" ? "semana" : "mes";
+  renderCalendar();
+};
+
 function renderCalendar() {
   calendarDiv.innerHTML = "";
-  const dias = ["Lun", "Mar", "Mié", "Jue", "Vie"];
-  const start = 9 * 60;
-  const end = 22 * 60;
-  const interval = 15;
+  if (currentView === "mes" || currentUser.rol === "alumno") {
+    renderMonthView();
+  } else {
+    renderWeekView();
+  }
+}
 
-  // Encabezados dobles por día
-  for (let dia of dias) {
-    const header1 = document.createElement("div");
-    header1.className = "cell";
-    header1.innerHTML = `<strong>${dia}<br>:00/:30</strong>`;
-    calendarDiv.append(header1);
+function renderMonthView() {
+  const year = selectedDate.getFullYear();
+  const month = selectedDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
 
-    const header2 = document.createElement("div");
-    header2.className = "cell";
-    header2.innerHTML = `<strong>${dia}<br>:15/:45</strong>`;
-    calendarDiv.append(header2);
+  const monthLabel = document.createElement("h3");
+  monthLabel.textContent = `${firstDay.toLocaleString("es", { month: "long" })} ${year}`;
+  calendarDiv.appendChild(monthLabel);
+
+  const nav = document.createElement("div");
+  nav.innerHTML = `<button id="prevMonth">◀️</button> <button id="nextMonth">▶️</button>`;
+  calendarDiv.appendChild(nav);
+
+  const grid = document.createElement("div");
+  grid.className = "month-grid";
+  const dias = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+  dias.forEach(d => {
+    const header = document.createElement("div");
+    header.className = "cell header";
+    header.textContent = d;
+    grid.appendChild(header);
+  });
+
+  const offset = (firstDay.getDay() + 6) % 7;
+  for (let i = 0; i < offset; i++) {
+    const empty = document.createElement("div");
+    empty.className = "cell empty";
+    grid.appendChild(empty);
   }
 
-  // Generar las filas por cada franja de 15 minutos
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const cell = document.createElement("div");
+    cell.className = "cell day";
+    cell.textContent = d;
+    cell.onclick = () => showDayDetail(new Date(year, month, d));
+    grid.appendChild(cell);
+  }
+
+  calendarDiv.appendChild(grid);
+  document.getElementById("prevMonth").onclick = () => {
+    selectedDate.setMonth(selectedDate.getMonth() - 1);
+    renderCalendar();
+  };
+  document.getElementById("nextMonth").onclick = () => {
+    selectedDate.setMonth(selectedDate.getMonth() + 1);
+    renderCalendar();
+  };
+}
+
+function showDayDetail(date) {
+  calendarDiv.innerHTML = "";
+  const label = document.createElement("h3");
+  label.textContent = date.toLocaleDateString("es");
+  calendarDiv.appendChild(label);
+
+  const start = 9 * 60;
+  const end = 22 * 60;
+  const interval = (currentUser.rol === "alumno" && currentUser.nivel === "GP" && currentUser.curso >= 5) ? 30 : 15;
+
   for (let min = start; min < end; min += interval) {
-    const minuteOfHour = min % 60;
-    const subCol = (minuteOfHour === 0 || minuteOfHour === 30) ? 0 : 1;
+    const hourStr = `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
+    const reserva = reservas.find(r => r.fecha === date.toDateString() && r.hora === hourStr);
+    const div = document.createElement("div");
+    div.className = "cell";
 
-    for (let dia of dias) {
-      for (let col = 0; col < 2; col++) {
-        if (col !== subCol) {
-          const empty = document.createElement("div");
-          empty.className = "cell hidden";
-          calendarDiv.appendChild(empty);
-          continue;
-        }
-
-        const hourStr = `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
-        const key = { dia, hora: hourStr };
-        const reserva = reservas.find(r => r.dia === key.dia && r.hora === key.hora);
-
-        const div = document.createElement("div");
-        div.className = "cell";
-
-        if (reserva) {
-          div.classList.add("reservado");
-          div.textContent = `${hourStr} (${reserva.alumno || reserva.profesor})`;
-          if (currentUser.rol === "alumno" && reserva.alumno === currentUser.id) {
-            div.onclick = () => {
-              const i = reservas.indexOf(reserva);
-              if (i !== -1) reservas.splice(i, 1);
-              renderCalendar();
-            };
-          }
-        } else {
-          div.classList.add("libre");
-          div.textContent = hourStr;
-          if (currentUser.rol === "alumno") {
-            div.onclick = () => {
-              reservas.push({ profesor: "P00", alumno: currentUser.id, dia: key.dia, hora: key.hora });
-              renderCalendar();
-            };
-          }
-        }
-
-        calendarDiv.appendChild(div);
+    if (reserva) {
+      div.classList.add("reservado");
+      div.textContent = `${hourStr}`;
+      if (currentUser.rol === "alumno" && reserva.alumno === currentUser.id) {
+        div.onclick = () => {
+          reservas.splice(reservas.indexOf(reserva), 1);
+          showDayDetail(date);
+        };
       }
+    } else {
+      div.classList.add("libre");
+      div.textContent = hourStr;
+      if (currentUser.rol === "alumno") {
+        div.onclick = () => {
+          reservas.push({ alumno: currentUser.id, profesor: "P00", fecha: date.toDateString(), hora: hourStr });
+          showDayDetail(date);
+        };
+      }
+    }
+
+    calendarDiv.appendChild(div);
+  }
+}
+
+function renderWeekView() {
+  const dias = ["Lun", "Mar", "Mié", "Jue", "Vie"];
+  const start = 9, end = 22;
+  calendarDiv.innerHTML = dias.map(d => `<div class="cell header"><strong>${d}</strong></div>`).join("");
+
+  for (let h = start * 60; h < end * 60; h += 30) {
+    for (let d = 0; d < 5; d++) {
+      const time = `${String(Math.floor(h / 60)).padStart(2, "0")}:${String(h % 60).padStart(2, "0")}`;
+      const div = document.createElement("div");
+      div.className = "cell";
+      const found = reservas.find(r => r.dia === dias[d] && r.hora === time);
+      if (found) {
+        div.classList.add("reservado");
+        div.textContent = `${time} (${found.alumno})`;
+      } else {
+        div.classList.add("libre");
+        div.textContent = time;
+      }
+      calendarDiv.appendChild(div);
     }
   }
 }
